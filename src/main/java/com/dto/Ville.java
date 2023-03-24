@@ -4,23 +4,17 @@ public class Ville {
 	private String codeCommune;
 	private String nomCommune;
 	private String codePostal;
-	private String ligne;
 	private String libelleAcheminement;
-
-	public String getCodePostal() {
-		return codePostal;
+	private String ligne;
+	private String latitude;
+	private String longitude;
+	
+	public String getCodeCommune() {
+		return codeCommune;
 	}
 
-	public void setCodePostal(String codePostal) {
-		this.codePostal = codePostal;
-	}
-
-	public String getLigne() {
-		return ligne;
-	}
-
-	public void setLigne(String ligne) {
-		this.ligne = ligne;
+	public void setCodeCommune(String codeCommune) {
+		this.codeCommune = codeCommune;
 	}
 
 	public String getNomCommune() {
@@ -31,12 +25,12 @@ public class Ville {
 		this.nomCommune = nomCommune;
 	}
 
-	public String getCodeCommune() {
-		return codeCommune;
+	public String getCodePostal() {
+		return codePostal;
 	}
 
-	public void setCodeCommune(String codeCommune) {
-		this.codeCommune = codeCommune;
+	public void setCodePostal(String codePostal) {
+		this.codePostal = codePostal;
 	}
 
 	public String getLibelleAcheminement() {
@@ -45,5 +39,35 @@ public class Ville {
 
 	public void setLibelleAcheminement(String libelleAcheminement) {
 		this.libelleAcheminement = libelleAcheminement;
+	}
+
+	public String getLigne() {
+		return ligne;
+	}
+
+	public void setLigne(String ligne) {
+		this.ligne = ligne;
+	}
+
+	
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+	
+	public String toString() {
+		return String.format("INSEE %1$s - %2$s %3$s Libellé [%4$s] | Lat = %5$s Lon = %6$s%n",
+				getCodeCommune(), getCodePostal(), getNomCommune(), getLibelleAcheminement(), getLatitude(), getLongitude());
 	}
 }
