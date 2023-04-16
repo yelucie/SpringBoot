@@ -2,7 +2,6 @@ package com.blo;
 
 import com.dto.VilleDto;
 import com.dto.VilleResponse;
-import com.models.Ville;
 
 public interface VilleBlo {
 	public VilleDto addVille(VilleDto villeDto);
