@@ -1,86 +1,106 @@
 package com.blo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.dao.VilleDAO;
-import com.dto.Ville;
+import com.dto.VilleDto;
+import com.dto.VilleResponse;
+import com.exceptions.VilleNotFoundException;
+import com.models.Ville;
+import com.repository.VilleRepository;
 
 @Service
-public class VilleBLOImpl implements VilleBLO {
+public class VilleBLOImpl implements VilleBlo {
 
 	@Autowired
-	private VilleDAO villeDAO;
+	private VilleRepository villeRepository;
 	
 	@Override
-	public List<Ville> getInfoVilles() {
-		return villeDAO.findAllVilles();
-	}
-	
-	@Override
-	public Ville getInfoVilleByCode(String codeCommune) {
-		for (Ville v : getInfoVilles()) {
-			if (v.getCodeCommune().equals(codeCommune)) {
-				return v;
-			}
-		}
-		return new Ville();
-	}
-	
-	@Override
-	public Ville getInfoVilleByNom(String nomCommune) {
-		for (Ville v : getInfoVilles()) {
-			if (v.getNomCommune().equals(nomCommune)) {
-				return v;
-			}
-		}
-		return new Ville();
-	}
-
-	@Override
-	public Ville getInfoVilleByCodeP(String codePostal) {
-		for (Ville v : getInfoVilles()) {
-			if (v.getCodePostal().equals(codePostal)) {
-				return v;
-			}
-		}
-		return new Ville();
+	public VilleDto addVille(VilleDto villeDto) {
+		Ville ville = new Ville();
+		ville.setCodeCommune(villeDto.getCodeCommune());
+		ville.setNomCommune(villeDto.getNomCommune());
+		ville.setCodePostal(villeDto.getCodePostal());
+		ville.setLibelleAcheminement(villeDto.getLibelleAcheminement());
+		ville.setLigne(villeDto.getLigne());
+		ville.setLatitude(villeDto.getLatitude());
+		ville.setLongitude(villeDto.getLongitude());
+		
+		Ville newVille = villeRepository.save(ville);
+		
+		VilleDto villeResponse = new VilleDto();
+		villeResponse.setCodeCommune(newVille.getCodeCommune());
+		villeResponse.setNomCommune(newVille.getNomCommune());
+		villeResponse.setCodePostal(newVille.getCodePostal());
+		villeResponse.setLibelleAcheminement(newVille.getLibelleAcheminement());
+		villeResponse.setLigne(newVille.getLigne());
+		villeResponse.setLatitude(newVille.getLatitude());
+		villeResponse.setLongitude(newVille.getLongitude());
+		
+		return villeResponse;
 	}
 	
 	@Override
-	public Ville addVille(Ville ville) {
-		return villeDAO.addVille(ville);
+	public VilleResponse getInfoVilles(int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+		Page<Ville> villes = villeRepository.findAll(pageable);
+		List<Ville> listOfVille = villes.getContent();
+		List<VilleDto> content = listOfVille.stream().map(p -> mapToDto(p)).collect(Collectors.toList());
+		
+		VilleResponse villeResponse = new VilleResponse();
+		villeResponse.setContent(content);
+		villeResponse.setPageNo(villes.getNumber());
+		villeResponse.setPageSize(villes.getSize());
+		villeResponse.setTotalElements(villes.getTotalElements());
+		villeResponse.setTotalPages(villes.getTotalPages());
+		villeResponse.setLast(villes.isLast());
+		
+		return villeResponse;
+	}
+	
+	@Override
+	public VilleDto getInfoVille(String codeCommune) {
+		Ville ville = villeRepository.findById(codeCommune).orElseThrow(() -> new VilleNotFoundException("Ville could not be found"));
+		return mapToDto(ville);
 	}
 
 	@Override
-	public Ville updateVilleByCode(String codeCommune, Ville ville) {
-		return villeDAO.updateVille(codeCommune, null, null, ville);
+	public VilleDto updateVille(String codeCommune, VilleDto villeDto) {
+		Ville ville = villeRepository.findById(codeCommune).orElseThrow(() -> new VilleNotFoundException("Ville could not be updated"));
+
+		ville.setCodeCommune(villeDto.getCodeCommune());
+		ville.setNomCommune(villeDto.getNomCommune());
+		ville.setCodePostal(villeDto.getCodePostal());
+		ville.setLibelleAcheminement(villeDto.getLibelleAcheminement());
+		ville.setLigne(villeDto.getLigne());
+		ville.setLatitude(villeDto.getLatitude());
+		ville.setLongitude(villeDto.getLongitude());
+
+        Ville updatedVille = villeRepository.save(ville);
+        return mapToDto(updatedVille);
 	}
 
 	@Override
-	public Ville updateVilleByName(String nomCommune, Ville ville) {
-		return villeDAO.updateVille(null, nomCommune, null, ville);
+	public void deleteVille(String codeCommune) {
+		Ville ville = villeRepository.findById(codeCommune).orElseThrow(() -> new VilleNotFoundException("Ville could not be delete"));
+        villeRepository.delete(ville);
 	}
-
-	@Override
-	public Ville updateVilleByCodeP(String codePostal, Ville ville) {
-		return villeDAO.updateVille(null, null, codePostal, ville);
-	}
-
-	@Override
-	public void deleteVilleByCode(String codeCommune) {
-		villeDAO.deleteVille(codeCommune, null, null);
-	}
-
-	@Override
-	public void deleteVilleByName(String nomCommune) {
-		villeDAO.deleteVille(null, nomCommune, null);
-	}
-
-	@Override
-	public void deleteVilleByCodeP(String codePostal) {
-		villeDAO.deleteVille(null, null, codePostal);
-	}
+	
+    private VilleDto mapToDto(Ville ville) {
+    	VilleDto villeDto = new VilleDto();
+    	villeDto.setCodeCommune(ville.getCodeCommune());
+    	villeDto.setNomCommune(ville.getNomCommune());
+    	villeDto.setCodePostal(ville.getCodePostal());
+    	villeDto.setLibelleAcheminement(ville.getLibelleAcheminement());
+    	villeDto.setLigne(ville.getLigne());
+    	villeDto.setLatitude(ville.getLatitude());
+    	villeDto.setLongitude(ville.getLongitude());
+        return villeDto;
+    }
 }
